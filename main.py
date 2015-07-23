@@ -46,6 +46,10 @@ if newf:
 	f = open('personalized', 'r+')
 	f.write(model)
 	dpath = 'personalized'
+
+fig_file = ''
+fig_file1 = ''
+fig_file2 = ''
 	
 class GranularCrystalSurrogate(object):
 
@@ -196,12 +200,32 @@ if __name__ == '__main__':
             for q1 in xrange(Y.shape[2]):
                 for q2 in xrange(q1 + 1):
                     try:
-                        fig_file = fig_prefix + '_p1=' + str(p1).zfill(2) + '_p2=' + str(p2).zfill(2) + '_q1=' + str(q1).zfill(2) + '_q2=' + str(q2).zfill(2) + '.pdf'
+                        fig_file = 'joint' + fig_prefix + '_p1=' + str(p1).zfill(2) + '_p2=' + str(p2).zfill(2) + '_q1=' + str(q1).zfill(2) + '_q2=' + str(q2).zfill(2) + '.png'
                         if os.path.isfile(fig_file):
                             continue
                         sns.jointplot(Y[:, p1, q1], Y[:, p2, q2], kind='hex', color='#4CB391')
                         print '+ writing:', fig_file
                         plt.savefig(fig_file, dpi=300)
+                        plt.clf()
+                    except:
+                        plt.clf()
+                    try:
+                        fig_file1 = 'marginal' + fig_prefix + '_p1=' + str(p1).zfill(2) + '_q1=' + str(q1).zfill(2) + '.png'
+                        if os.path.isfile(fig_file1):
+                            continue
+                        sns.distplot(Y[:, p1, q1], color='#4CB391')
+                        print '+ writing:', fig_file1
+                        plt.savefig(fig_file1, dpi=300)
+                        plt.clf()
+                    except:
+                        plt.clf()
+                    try:
+                        fig_file2 = 'marginal' + fig_prefix + '_p2=' + str(p2).zfill(2) + '_q2=' + str(q2).zfill(2) + '.png'
+                        if os.path.isfile(fig_file2):
+                            continue
+                        sns.jointplot(Y[:, p2, q2], color='#4CB391')
+                        print '+ writing:', fig_file2
+                        plt.savefig(fig_file2, dpi=300)
                         plt.clf()
                     except:
                         plt.clf()
@@ -217,6 +241,24 @@ Rappture.Utils.progress(100, "Done")
 # Save output values back to Rappture
 #########################################################
 
+# save output value for output.image(jointplot)
+# data should be base64-encoded image data
+# save output value for output.image(marginal1)
+# data should be base64-encoded image data
+# save output value for output.image(marginal2)
+# data should be base64-encoded image data
+
+with open(fig_file, 'rb') as fd:
+    imdata = base64.b64encode(fd.read())
+io.put('output.image(jointplot).current', imdata)
+
+with open(fig_file1, 'rb') as fd:
+    imdata = base64.b64encode(fd.read())
+io.put('output.image(marginal1).current', imdata)
+
+with open(fig_file2, 'rb') as fd:
+    imdata = base64.b64encode(fd.read())
+io.put('output.image(marginal2).current', imdata)
 
 io.close()
 sys.exit()
